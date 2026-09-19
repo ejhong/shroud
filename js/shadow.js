@@ -139,7 +139,7 @@ function exposureRecord(data,stage){return {data:Array.from(data),width:w,height
   note:stage+' from '+sourceName+'. The modeled reflectance is inverted in the depth viewer.',settings:result.settings};}
 $('to-depth').addEventListener('click',()=>{
   if(!result||!current)return;
-  if(saveExposure(exposureRecord(current,$('time-out').textContent)))location.href='depth.html?source=simulation';
+  if(saveExposure(exposureRecord(current,$('time-out').textContent)))location.href='depth.html?source=simulation#height-lab';
   else status('Your browser could not store the result. Download the image and upload it in the depth lab.',true);
 });
 $('share').addEventListener('click',async()=>{

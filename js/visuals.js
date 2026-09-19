@@ -56,16 +56,16 @@ export class Surface {
     this.resizeObserver=new ResizeObserver(()=>this.draw());this.resizeObserver.observe(canvas);
     let drag=null;
     canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
-    canvas.addEventListener('pointermove',e=>{if(!drag)return;this.yaw+=(e.clientX-drag.x)*.008;this.pitch=clamp(this.pitch+(e.clientY-drag.y)*.008,-1.45,1.45);drag={x:e.clientX,y:e.clientY};this.draw();});
+    canvas.addEventListener('pointermove',e=>{if(!drag)return;this.yaw+=(e.clientX-drag.x)*.008;this.pitch=clamp(this.pitch+(e.clientY-drag.y)*.008,-1.45,1.45);drag={x:e.clientX,y:e.clientY};this.viewChanged();});
     canvas.addEventListener('pointerup',()=>drag=null);canvas.addEventListener('pointercancel',()=>drag=null);
     canvas.addEventListener('keydown',e=>{
       if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-','0'].includes(e.key))return;
       e.preventDefault();if(e.key==='ArrowLeft')this.yaw-=.12;if(e.key==='ArrowRight')this.yaw+=.12;
       if(e.key==='ArrowUp')this.pitch=clamp(this.pitch-.12,-1.45,1.45);if(e.key==='ArrowDown')this.pitch=clamp(this.pitch+.12,-1.45,1.45);
       if(e.key==='+'||e.key==='=')this.zoom=clamp(this.zoom+.1,.6,1.8);if(e.key==='-')this.zoom=clamp(this.zoom-.1,.6,1.8);
-      if(e.key==='0')this.reset();this.draw();
+      if(e.key==='0'){this.reset();return;}this.viewChanged();
     });
-    canvas.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();this.zoom=clamp(this.zoom-e.deltaY*.002,.6,1.8);this.draw();},{passive:false});
+    canvas.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();this.zoom=clamp(this.zoom-e.deltaY*.002,.6,1.8);this.viewChanged();},{passive:false});
   }
   init() {
     const gl=this.gl;
@@ -104,7 +104,8 @@ export class Surface {
     gl.bindBuffer(gl.ARRAY_BUFFER,this.vertices);gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.indices);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);this.count=indices.length;this.draw();
   }
-  reset(){this.yaw=-.34;this.pitch=-.45;this.zoom=1;this.draw();}
+  viewChanged(){this.draw();this.onViewChange?.({yaw:this.yaw,pitch:this.pitch,zoom:this.zoom});}
+  reset(){this.yaw=-.34;this.pitch=-.45;this.zoom=1;this.viewChanged();}
   draw() {
     const c=this.canvas,w=c.clientWidth,h=c.clientHeight;if(!w||!h)return;
     const dpr=Math.min(devicePixelRatio||1,2);c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);

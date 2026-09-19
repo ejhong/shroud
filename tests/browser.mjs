@@ -91,21 +91,49 @@ try{
   await input('painting','shroud','change');await until(`document.getElementById('mask-scale').textContent==='300 mm wide'&&${done}`);
   await click('#to-depth');await until(`location.pathname.endsWith('depth.html')&&${ready}`);assert.ok(await client.evaluate(`document.getElementById('invert').checked`));await screenshot('transferred-depth.png');
   await click('[data-depth-preset="known"]');await until(`document.querySelector('#agreement').textContent.includes('1.000')`);
+  const surfacesMatch=`document.getElementById('surface').toDataURL()===document.getElementById('baseline-surface').toDataURL()`;
+  assert.ok(await client.evaluate(surfacesMatch),'Known unfiltered heights should render identically');
+  const beforeOrbit=await client.evaluate(`document.getElementById('surface').toDataURL()`);
+  await client.evaluate(`document.getElementById('baseline-surface').dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight'}))`);
+  assert.ok(await client.evaluate(surfacesMatch),'Rotating the baseline must rotate the adjusted view');
+  assert.notEqual(await client.evaluate(`document.getElementById('surface').toDataURL()`),beforeOrbit);
+  await client.evaluate(`document.getElementById('surface').dispatchEvent(new KeyboardEvent('keydown',{key:'+'}))`);
+  assert.ok(await client.evaluate(surfacesMatch),'Zoom must stay synchronized in both directions');
   await click('[data-depth-preset="portrait"]');await until(`document.querySelector('#surface-label').textContent.includes('SIDE LIGHTING')`);assert.ok(!await client.evaluate(`document.querySelector('#agreement').textContent.includes('1.000')`));
   await click('[data-depth-preset="soft"]');await until(`document.querySelector('#surface-label').textContent.includes('SHROUD FACE')`);
   await input('slice',35);assert.ok(await client.evaluate(`document.querySelector('#profile-caption').textContent.includes('Row 86')`));
+  await input('slice-axis','vertical','change');await input('slice',50);
+  assert.ok(await client.evaluate(`document.querySelector('#profile-caption').textContent.includes('Column 91 of 180')`));
+  await client.evaluate(`document.getElementById('height-lab').scrollIntoView()`);
   await click('#side');await screenshot('depth-profile.png');await click('#orbit-reset');await screenshot('depth-desktop.png');
   assert.equal(await client.evaluate(`document.querySelector('#surface').dataset.fallback`),undefined,'WebGL failed unexpectedly');
   await click('#depth-data');await wait(300);assert.ok((await readdir(downloads)).includes('shroud-height-field.json'));
+  const heights=JSON.parse(await readFile(join(downloads,'shroud-height-field.json'),'utf8'));
+  assert.equal(heights.baseline.length,heights.heights.length);assert.deepEqual(heights.baseline,heights.original);
+  assert.notDeepEqual(heights.baseline,heights.heights);assert.equal(heights.crossSection.axis,'vertical');
+  await click('[data-depth-preset="raw"]');await until(surfacesMatch);
+  assert.equal(await client.evaluate(`document.getElementById('stretch').checked`),false);
+  await input('source','enrie','change');await until(`document.getElementById('surface-label').textContent.includes('ENRIE')`);
+  assert.ok(await client.evaluate(surfacesMatch));
+  await client.evaluate(`document.getElementById('reconstruction-story').scrollIntoView()`);await screenshot('reconstruction-references.png');
   const {root:depthDocument}=await client.send('DOM.getDocument');const {nodeId:uploadNode}=await client.send('DOM.querySelector',{nodeId:depthDocument.nodeId,selector:'#depth-upload'});
   await client.send('DOM.setFileInputFiles',{nodeId:uploadNode,files:[resolve('assets/images/face-negative.jpg')]});await until(`document.getElementById('source').value==='upload'&&document.getElementById('status').textContent==='Uploaded image loaded.'`);
   await input('source','known','change');await until(`document.getElementById('source').value==='known'&&document.querySelector('#surface-label').textContent.includes('KNOWN DEPTH')`);
   await navigate('methods.html');await screenshot('methods-desktop.png');
-  for(const path of ['index.html','shadow.html','depth.html','methods.html']){
+  await navigate('research.html');await screenshot('research-desktop.png');
+  assert.equal(await client.evaluate(`document.querySelectorAll('.research-project').length`),5);
+  assert.equal(await client.evaluate(`document.querySelector('nav[aria-label="Main navigation"] [aria-current="page"]').getAttribute('href')`),'research.html');
+  await click('.research-header-bottom a');await until(`location.hash==='#shadow-test'`);
+  await client.evaluate(`document.getElementById('shadow-test').scrollIntoView()`);await screenshot('research-shadow-test.png');
+  await client.evaluate(`document.querySelector('.research-test-table').scrollIntoView()`);await screenshot('research-outcomes.png');
+  for(const path of ['index.html','shadow.html','depth.html','methods.html','research.html']){
     await navigate(path,390,844);if(path==='shadow.html'||path==='depth.html')await until(ready);
     await screenshot(path.replace('.html','')+'-mobile.png');await screenshot(path.replace('.html','')+'-mobile-full.png',true);
     assert.ok(await client.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),`Late horizontal overflow: ${path}`);
   }
+  await navigate('research.html#shadow-test',390,844);
+  await client.evaluate(`document.querySelector('.shadow-stages').scrollIntoView()`);await screenshot('research-protocol-mobile.png');
+  await navigate('research.html',390,844);await client.evaluate(`document.getElementById('dna').scrollIntoView()`);await screenshot('research-dna-mobile.png');
   await navigate('shadow.html?painting=bars&gap=999&days=-5&latitude=999&fixed=true',360,800);await until(ready);
   assert.equal(await client.evaluate(`document.getElementById('gap').value`),'60');assert.equal(await client.evaluate(`document.getElementById('days').value`),'1');
   // The renderer remains usable on browsers without WebGL.
@@ -113,5 +141,5 @@ try{
   await navigate('depth.html',390,844);await until(ready);assert.equal(await client.evaluate(`document.getElementById('surface').dataset.fallback`),'true');await screenshot('depth-fallback.png');await client.send('Page.removeScriptToEvaluateOnNewDocument',{identifier});
   const exceptions=client.events.filter(e=>e.method==='Runtime.exceptionThrown');assert.deepEqual(exceptions,[],'Uncaught JavaScript exceptions');
   const bad=client.events.filter(e=>e.method==='Network.responseReceived'&&e.params.response.url.startsWith(base.origin)&&e.params.response.status>=400).map(e=>e.params.response.url);assert.deepEqual(bad,[],'Failed local requests');
-  console.log(`Browser checks passed: desktop/mobile layouts, original painting and physical-result assets, photo inversion, physical controls, playback, painting/undo, six comparisons, target fitting, JSON export/import, image upload, automatic cross-page persistence, first-visit example, WebGL and its fallback, and synthetic controls.\nScreenshots: ${screenshots}\nDownloads: ${downloads}`);
+  console.log(`Browser checks passed: desktop/mobile layouts, original painting and physical-result assets, photo inversion, physical controls, playback, painting/undo, six comparisons, target fitting, JSON export/import, image upload, automatic cross-page persistence, first-visit example, WebGL and its fallback, linked height comparisons, vertical sections, research references, and synthetic controls.\nScreenshots: ${screenshots}\nDownloads: ${downloads}`);
 }finally{client?.close();browserClient?.close();browser.kill('SIGTERM');}

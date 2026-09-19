@@ -23,8 +23,9 @@ The browser check uses installed Google Chrome on macOS, with a temporary profil
 
 - `index.html`: illustrated inquiry, an identifiable archival face, the original Shadow Shroud physical-result photographs, evidence overview, and saved model outputs.
 - `shadow.html`: start with Beauchamp’s original glass painting, paint/upload an opacity mask, adjust physical settings, animate integrated exposure, compare six matched-dose conditions, fit a target-informed mask, save/load experiments, and send an image into the depth lab.
-- `depth.html`: orbit a height field, change processing, compare known geometry with shaded intensity, inspect a cross-section, export the image/data.
+- `depth.html`: published reconstruction references, synchronized unfiltered/adjusted height fields, horizontal and vertical profiles, known-geometry controls, and image/data exports.
 - `methods.html`: sources, equations, assumptions, reproduction instructions, and image credits.
+- `research.html`: five ranked research projects, a detailed Shadow Shroud replication protocol, decision criteria, and primary references.
 
 ## Implementation
 
@@ -41,3 +42,11 @@ GitHub Pages publishes the root of `main`. `.nojekyll` keeps this a plain static
 ## Sources and licenses
 
 See `methods.html#images` for individual image provenance. Supplied scan attribution remains unverified; they are uncalibrated photographic inputs. Wikimedia’s face and full-cloth images have their sources recorded. Beauchamp’s glass photograph and Wilson’s three physical-result plates are credited and linked to their original gallery. Font licenses are in `assets/fonts`. The project's generated controls and model outputs are clearly distinguished from archival photographs and physical experiments.
+
+## Reconstruction claim and depth comparison
+
+`depth.html#reconstruction-story` connects the experiment with the VP-8 history and Ray Downing’s *The Real Face of Jesus?* project. Three credited source images distinguish an earlier relief, a project working view, and a later finished portrait. The lab does not reproduce the documentary’s complete workflow. `js/depth-model.js` calculates a polarity-matched baseline and independently adjusted height field; both views share camera, material, and relief scale. Horizontal and vertical profiles and JSON exports retain both fields. The Enrie reproduction provides another explicitly uncalibrated photographic input. See `methods.html#reconstruction` for the primary sources and limits of this comparison.
+
+## Research agenda
+
+`research.html` ranks five proposed investments across optics, calibrated imaging, fiber chemistry, radiocarbon/textiles, and ancient DNA. It includes a three-part Shadow Shroud replication protocol with controls, independent replication, and explicit interpretations for positive, negative, and inconclusive outcomes. Rankings and proposed protocols are editorial judgments grounded in the linked primary sources, not completed experiments or consensus conclusions. The page is fully readable without JavaScript.
