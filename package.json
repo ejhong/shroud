@@ -1,0 +1,13 @@
+{
+  "name": "shroud-an-open-inquiry",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "results": "node scripts/build-results.mjs",
+    "check": "node scripts/check-site.mjs",
+    "test:browser": "node tests/browser.mjs"
+  }
+}

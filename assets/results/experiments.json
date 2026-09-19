@@ -1,0 +1,99 @@
+{
+  "version": "1.0.0",
+  "width": 113,
+  "height": 145,
+  "input": "Face-only crop [65,90,113,145] from the 250×344 source photograph. Rec.709-weighted encoded RGB brightness; opacity = clamp((brightness − 0.30) / 0.60, 0, 1). No smoothing, redraw, or generative enhancement. Opacity and a 300 mm model width are assumed, not measured.",
+  "source": "https://shadowshroud.com/images/window.jpg",
+  "sourceSHA256": "35da912638a142d24837eea1b7b7bb35f81b6ed0757ee448f0e6656b7b22e342",
+  "display": "Assumed linen palette with display-only weave; no tonal stretching",
+  "records": [
+    {
+      "name": "fixed",
+      "settings": {
+        "days": 10,
+        "gap": 3,
+        "glass": 3,
+        "topPaint": true,
+        "rotation": 90,
+        "latitude": 44,
+        "day": 172,
+        "opacity": 0.98,
+        "diffuse": 0.12,
+        "rate": 0.055,
+        "fixed": true,
+        "widthMM": 300
+      },
+      "metrics": {
+        "energy": 80.91184609033441,
+        "spread": 0,
+        "tonalRange": 0.2811139225959778
+      }
+    },
+    {
+      "name": "moving",
+      "settings": {
+        "days": 10,
+        "gap": 3,
+        "glass": 3,
+        "topPaint": true,
+        "rotation": 90,
+        "latitude": 44,
+        "day": 172,
+        "opacity": 0.98,
+        "diffuse": 0.12,
+        "rate": 0.055,
+        "fixed": false,
+        "widthMM": 300
+      },
+      "metrics": {
+        "energy": 80.91184609033441,
+        "spread": 5.37415021906163,
+        "tonalRange": 0.25854992866516113
+      }
+    },
+    {
+      "name": "wide-gap",
+      "settings": {
+        "days": 10,
+        "gap": 35,
+        "glass": 3,
+        "topPaint": true,
+        "rotation": 90,
+        "latitude": 44,
+        "day": 172,
+        "opacity": 0.98,
+        "diffuse": 0.12,
+        "rate": 0.055,
+        "fixed": false,
+        "widthMM": 300
+      },
+      "metrics": {
+        "energy": 80.91184609033441,
+        "spread": 48.49361874455227,
+        "tonalRange": 0.11411643028259277
+      }
+    },
+    {
+      "name": "rotated",
+      "settings": {
+        "days": 10,
+        "gap": 3,
+        "glass": 3,
+        "topPaint": true,
+        "rotation": 0,
+        "latitude": 44,
+        "day": 172,
+        "opacity": 0.98,
+        "diffuse": 0.12,
+        "rate": 0.055,
+        "fixed": false,
+        "widthMM": 300
+      },
+      "metrics": {
+        "energy": 80.91184609033441,
+        "spread": 5.37415021906163,
+        "tonalRange": 0.2566804885864258
+      }
+    }
+  ]
+}

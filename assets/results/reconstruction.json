@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "source": "assets/images/face-negative.jpg",
+  "sourceSHA256": "2983b21e48099611506521c986d7c6a22c7c1e86285752e969964659fc96f870",
+  "inputMethod": "Canvas2D resampling to 144 pixels wide; display-encoded Rec.709 weighted grayscale; minimum-to-maximum normalization. Same loadField and normalize functions as the sunlight app.",
+  "width": 144,
+  "height": 195,
+  "settings": {
+    "days": 10,
+    "gap": 3,
+    "glass": 3,
+    "topPaint": true,
+    "rotation": 90,
+    "latitude": 44,
+    "day": 172,
+    "opacity": 0.98,
+    "diffuse": 0.12,
+    "rate": 0.055,
+    "fixed": false,
+    "widthMM": 300
+  },
+  "iterations": 24,
+  "reflectanceRMSEBefore": 0.049783419208878146,
+  "reflectanceRMSEAfter": 0.012530434118596766,
+  "interpretation": "Target-informed fit to mapped photograph tones. This is not independent validation of image formation."
+}
