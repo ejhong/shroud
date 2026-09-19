@@ -25,7 +25,7 @@ The browser check uses installed Google Chrome on macOS, with a temporary profil
 - `shadow.html`: start with Beauchamp’s original glass painting, paint/upload an opacity mask, adjust physical settings, animate integrated exposure, compare six matched-dose conditions, fit a target-informed mask, save/load experiments, and send an image into the depth lab.
 - `depth.html`: published reconstruction references, synchronized unfiltered/adjusted height fields, horizontal and vertical profiles, known-geometry controls, and image/data exports.
 - `methods.html`: sources, equations, assumptions, reproduction instructions, and image credits.
-- `research.html`: laboratory funding priorities, a ranked direct-access program, a detailed Shadow Shroud replication protocol, decision criteria, and primary references.
+- `research.html`: one ranked agenda of ten distinct studies, access requirements, a detailed Shadow Shroud protocol, decision criteria, and primary references.
 
 ## Implementation
 
@@ -49,6 +49,6 @@ See `methods.html#images` for individual image provenance. Supplied scan attribu
 
 ## Research agenda
 
-`research.html` ranks five proposed investments across optics, calibrated imaging, fiber chemistry, radiocarbon/textiles, and ancient DNA. It includes a three-part Shadow Shroud replication protocol with controls, independent replication, and explicit interpretations for positive, negative, and inconclusive outcomes. Rankings and proposed protocols are editorial judgments grounded in the linked primary sources, not completed experiments or consensus conclusions. The page is fully readable without JavaScript.
+`research.html#priorities` is one ordered list of ten distinct studies: mapped radiocarbon dating, image chemistry, calibrated imaging, Shadow Shroud replication, a known-geometry 3D benchmark, textile manufacture/repairs, red-stain composition/sequence, documentary provenance, pollen/particles, and DNA authentication. Each entry states its question, access needs, method, decision, limits, and first deliverable. Rankings and protocols are editorial judgments grounded in the linked primary sources.
 
-The direct-access agenda at `research.html#direct-access` assumes access to both surfaces and agreed sampling. Its five expandable proposals prioritize mapped AMS radiocarbon dating, calibrated imaging, paired fiber chemistry, pollen/particles, and biological traces. It distinguishes funding rank from the order of a coordinated visit, explains pollen’s provenance limits, and connects measured image texture to the height-map question. Pollen context is sourced to Boi’s 2016/2017 primary study.
+Native disclosure controls keep the list readable without JavaScript. `js/research.js` expands a linked study automatically, preserves earlier access-specific anchors, and includes every study when printing. The former two overlapping agendas have been consolidated; `#direct-access` now leads to the unified list.

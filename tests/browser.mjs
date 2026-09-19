@@ -121,28 +121,37 @@ try{
   await input('source','known','change');await until(`document.getElementById('source').value==='known'&&document.querySelector('#surface-label').textContent.includes('KNOWN DEPTH')`);
   await navigate('methods.html');await screenshot('methods-desktop.png');
   await navigate('research.html');await screenshot('research-desktop.png');
-  assert.equal(await client.evaluate(`document.querySelectorAll('.research-project').length`),5);
+  assert.equal(await client.evaluate(`document.querySelectorAll('.agenda-list').length`),1);
+  assert.equal(await client.evaluate(`document.querySelectorAll('.agenda-list>li>details.research-project').length`),10);
   assert.equal(await client.evaluate(`document.querySelector('nav[aria-label="Main navigation"] [aria-current="page"]').getAttribute('href')`),'research.html');
-  assert.equal(await client.evaluate(`document.querySelectorAll('.direct-studies>details').length`),5);
-  await click('.research-header-actions a[href="#direct-access"]');await until(`location.hash==='#direct-access'`);
-  await client.evaluate(`document.getElementById('direct-access').scrollIntoView()`);await screenshot('research-direct-access.png');
-  await click('#access-pollen summary');assert.ok(await client.evaluate(`document.getElementById('access-pollen').open`));
-  await client.evaluate(`document.getElementById('access-pollen').scrollIntoView()`);await screenshot('research-pollen.png');
-  await click('#access-pollen summary');assert.equal(await client.evaluate(`document.getElementById('access-pollen').open`),false);
-  await click('.research-header-actions a[href="#shadow-test"]');await until(`location.hash==='#shadow-test'`);
+  await click('.research-header-actions a[href="#priorities"]');await until(`location.hash==='#priorities'`);
+  await client.evaluate(`document.getElementById('priorities').scrollIntoView()`);await screenshot('research-priorities.png');
+  await click('#pollen summary');assert.ok(await client.evaluate(`document.getElementById('pollen').open`));
+  await client.evaluate(`document.getElementById('pollen').scrollIntoView()`);await screenshot('research-pollen.png');
+  await click('#pollen summary');assert.equal(await client.evaluate(`document.getElementById('pollen').open`),false);
+  await click('.research-header-actions a[href="#shadow-test"]');await until(`location.hash==='#shadow-test'&&document.getElementById('shadow-test').open`);
   await client.evaluate(`document.getElementById('shadow-test').scrollIntoView()`);await screenshot('research-shadow-test.png');
   await client.evaluate(`document.querySelector('.research-test-table').scrollIntoView()`);await screenshot('research-outcomes.png');
+  // Printing includes the complete agenda and preserves the reader's choices.
+  const disclosureState=await client.evaluate(`[...document.querySelectorAll('.research-project')].map(study=>study.open)`);
+  await client.evaluate(`dispatchEvent(new Event('beforeprint'))`);
+  assert.equal(await client.evaluate(`document.querySelectorAll('.research-project[open]').length`),10);
+  await client.evaluate(`dispatchEvent(new Event('afterprint'))`);
+  assert.deepEqual(await client.evaluate(`[...document.querySelectorAll('.research-project')].map(study=>study.open)`),disclosureState);
   for(const path of ['index.html','shadow.html','depth.html','methods.html','research.html']){
     await navigate(path,390,844);if(path==='shadow.html'||path==='depth.html')await until(ready);
     await screenshot(path.replace('.html','')+'-mobile.png');await screenshot(path.replace('.html','')+'-mobile-full.png',true);
     assert.ok(await client.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),`Late horizontal overflow: ${path}`);
   }
   await navigate('research.html#shadow-test',390,844);
+  await until(`document.getElementById('shadow-test').open`);
   await client.evaluate(`document.querySelector('.shadow-stages').scrollIntoView()`);await screenshot('research-protocol-mobile.png');
-  await navigate('research.html#direct-access',390,844);await click('#access-pollen summary');
-  await client.evaluate(`document.getElementById('access-pollen').scrollIntoView()`);await screenshot('research-pollen-mobile.png');
-  assert.ok(await client.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'Overflow in the expanded direct-access proposal');
-  await navigate('research.html',390,844);await client.evaluate(`document.getElementById('dna').scrollIntoView()`);await screenshot('research-dna-mobile.png');
+  // Older links reveal the corresponding study in the unified list.
+  await navigate('research.html#access-pollen',390,844);await until(`document.getElementById('pollen').open`);
+  await client.evaluate(`document.getElementById('pollen').scrollIntoView()`);await screenshot('research-pollen-mobile.png');
+  assert.ok(await client.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'Overflow in the expanded pollen study');
+  await navigate('research.html#dna',390,844);await until(`document.getElementById('dna').open`);
+  await client.evaluate(`document.getElementById('dna').scrollIntoView()`);await screenshot('research-dna-mobile.png');
   await navigate('shadow.html?painting=bars&gap=999&days=-5&latitude=999&fixed=true',360,800);await until(ready);
   assert.equal(await client.evaluate(`document.getElementById('gap').value`),'60');assert.equal(await client.evaluate(`document.getElementById('days').value`),'1');
   // The renderer remains usable on browsers without WebGL.
@@ -150,5 +159,5 @@ try{
   await navigate('depth.html',390,844);await until(ready);assert.equal(await client.evaluate(`document.getElementById('surface').dataset.fallback`),'true');await screenshot('depth-fallback.png');await client.send('Page.removeScriptToEvaluateOnNewDocument',{identifier});
   const exceptions=client.events.filter(e=>e.method==='Runtime.exceptionThrown');assert.deepEqual(exceptions,[],'Uncaught JavaScript exceptions');
   const bad=client.events.filter(e=>e.method==='Network.responseReceived'&&e.params.response.url.startsWith(base.origin)&&e.params.response.status>=400).map(e=>e.params.response.url);assert.deepEqual(bad,[],'Failed local requests');
-  console.log(`Browser checks passed: desktop/mobile layouts, original painting and physical-result assets, photo inversion, physical controls, playback, painting/undo, six comparisons, target fitting, JSON export/import, image upload, automatic cross-page persistence, first-visit example, WebGL and its fallback, linked height comparisons, vertical sections, research references, and synthetic controls.\nScreenshots: ${screenshots}\nDownloads: ${downloads}`);
+  console.log(`Browser checks passed: desktop/mobile layouts, original painting and physical-result assets, photo inversion, physical controls, playback, painting/undo, six comparisons, target fitting, JSON export/import, image upload, automatic cross-page persistence, first-visit example, WebGL and its fallback, linked height comparisons, vertical sections, unified research agenda, deep links, print restoration, and synthetic controls.\nScreenshots: ${screenshots}\nDownloads: ${downloads}`);
 }finally{client?.close();browserClient?.close();browser.kill('SIGTERM');}
