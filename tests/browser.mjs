@@ -123,7 +123,13 @@ try{
   await navigate('research.html');await screenshot('research-desktop.png');
   assert.equal(await client.evaluate(`document.querySelectorAll('.research-project').length`),5);
   assert.equal(await client.evaluate(`document.querySelector('nav[aria-label="Main navigation"] [aria-current="page"]').getAttribute('href')`),'research.html');
-  await click('.research-header-bottom a');await until(`location.hash==='#shadow-test'`);
+  assert.equal(await client.evaluate(`document.querySelectorAll('.direct-studies>details').length`),5);
+  await click('.research-header-actions a[href="#direct-access"]');await until(`location.hash==='#direct-access'`);
+  await client.evaluate(`document.getElementById('direct-access').scrollIntoView()`);await screenshot('research-direct-access.png');
+  await click('#access-pollen summary');assert.ok(await client.evaluate(`document.getElementById('access-pollen').open`));
+  await client.evaluate(`document.getElementById('access-pollen').scrollIntoView()`);await screenshot('research-pollen.png');
+  await click('#access-pollen summary');assert.equal(await client.evaluate(`document.getElementById('access-pollen').open`),false);
+  await click('.research-header-actions a[href="#shadow-test"]');await until(`location.hash==='#shadow-test'`);
   await client.evaluate(`document.getElementById('shadow-test').scrollIntoView()`);await screenshot('research-shadow-test.png');
   await client.evaluate(`document.querySelector('.research-test-table').scrollIntoView()`);await screenshot('research-outcomes.png');
   for(const path of ['index.html','shadow.html','depth.html','methods.html','research.html']){
@@ -133,6 +139,9 @@ try{
   }
   await navigate('research.html#shadow-test',390,844);
   await client.evaluate(`document.querySelector('.shadow-stages').scrollIntoView()`);await screenshot('research-protocol-mobile.png');
+  await navigate('research.html#direct-access',390,844);await click('#access-pollen summary');
+  await client.evaluate(`document.getElementById('access-pollen').scrollIntoView()`);await screenshot('research-pollen-mobile.png');
+  assert.ok(await client.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'Overflow in the expanded direct-access proposal');
   await navigate('research.html',390,844);await client.evaluate(`document.getElementById('dna').scrollIntoView()`);await screenshot('research-dna-mobile.png');
   await navigate('shadow.html?painting=bars&gap=999&days=-5&latitude=999&fixed=true',360,800);await until(ready);
   assert.equal(await client.evaluate(`document.getElementById('gap').value`),'60');assert.equal(await client.evaluate(`document.getElementById('days').value`),'1');
