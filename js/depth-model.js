@@ -23,6 +23,8 @@ export const RECONSTRUCTION_DEFAULTS=Object.freeze({
   cloth:'arched',range:37,law:'linear',sideDrop:30,lengthDrop:10,
   headDepth:45,broadScale:15,imageWidth:160
 });
+// Shared by the opening lab view and the home-page example.
+export const RECONSTRUCTION_PROCESSING=Object.freeze({smoothing:2.25,inverted:false,stretched:true,gamma:1});
 
 // Both laws have signal 1 at contact and 0 at the chosen maximum distance.
 // The exponential is truncated and rescaled, with an illustrative k = 3.

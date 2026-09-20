@@ -23,7 +23,7 @@ The browser check uses installed Google Chrome on macOS, with a temporary profil
 
 - `index.html`: an archival face, direct entrances to both labs, the cloth, physical Shadow Shroud trials, an evidence overview, and clearly labeled model outputs.
 - `shadow.html`: start with Beauchamp’s original glass painting, paint/upload an opacity mask, adjust physical settings, animate integrated exposure, compare six matched-dose conditions, fit a target-informed mask, save/load experiments, and send an image into the depth lab.
-- `depth.html`: direct brightness relief plus a cloth–body reconstruction mode, with linked comparisons, profiles, known-geometry tests, and full data exports; documentary references follow the experiment.
+- `depth.html`: opens in cloth–body reconstruction mode, with direct brightness relief available for comparison, profiles, known-geometry tests, and full data exports; documentary references follow the experiment.
 - `methods.html`: grouped navigation through evidence, model equations, reproduction instructions, and image credits.
 - `research.html`: one ranked agenda of ten distinct studies, access requirements, a detailed Shadow Shroud protocol, decision criteria, and primary references.
 
@@ -45,9 +45,9 @@ See `methods.html#images` for individual image provenance. Supplied scan attribu
 
 ## Reconstruction claim and depth comparison
 
-`depth.html#reconstruction-story` connects the experiment with the VP-8 history and Ray Downing’s *The Real Face of Jesus?* project. Credited images distinguish a relief, a working view, and a later portrait. The new `depth.html?mode=reconstruction` explores the published cloth–body-distance principle; it is not an exact replication of Downing’s undocumented numerical pipeline.
+`depth.html#reconstruction-story` connects the experiment with the VP-8 history and Ray Downing’s *The Real Face of Jesus?* project. Credited images distinguish a relief, a working view, and a later portrait. The default `depth.html` view explores the published cloth–body-distance principle; it is not an exact replication of Downing’s undocumented numerical pipeline.
 
-`js/depth-model.js` preserves the direct-brightness comparison and adds two inverse distance laws, flat/parabolic cloth surfaces, and an explicit reference-assisted option. The latter supplies a featureless oval cap and adds high-frequency image detail. Every assumed surface is inspectable; x/y are unchanged, with no lateral cloth unwrapping or cloth mechanics. Model millimetres use an assumed image width and gap range, never an image-derived anatomical calibration. Both panels use one physical scale without vertical exaggeration.
+`js/depth-model.js` preserves the direct-brightness comparison and adds two inverse distance laws, flat/parabolic cloth surfaces, and an explicit reference-assisted option. The latter supplies a featureless oval cap and adds high-frequency image detail. Every assumed surface is inspectable; x/y are unchanged, with no lateral cloth unwrapping or cloth mechanics. Model millimetres use an assumed image width and gap range, never an image-derived anatomical calibration. Both panels use one physical scale without vertical exaggeration. The home-page example shares the default curved-cloth reconstruction, 180-pixel source grid, processing settings, and camera. `depth.html?mode=brightness` opens the direct-relief comparison.
 
 The known-distance control starts from fixed independent synthetic geometry and encodes its vertical gap beneath a known cloth. Correct settings recover it to floating-point precision; wrong drape, law, range, or tonal processing produce measurable full-grid RMSE. This is an internal numerical check, not physical validation. Reconstruction JSON includes the input, signal, gap, cloth, body, optional broad reference and control truth, settings, coordinate definitions, and model version. Direct-mode exports retain the original baseline/adjusted format. See `methods.html#cloth-distance` for equations and limitations.
 

@@ -2,13 +2,13 @@ import {knownFace,litPortrait,paintedFace,correlation,MODEL_VERSION,DEFAULTS} fr
 import {loadField,drawField,Surface,bindRanges,download,downloadCanvas} from './visuals.js';
 import {loadExposure} from './experiments.js';
 import {beauchampPainting} from './paintings.js';
-import {heightFields,crossSection,reconstruct,distanceControl,geometryError,metricDisplay,RECONSTRUCTION_DEFAULTS,RECONSTRUCTION_VERSION,CLOTH_DATUM} from './depth-model.js';
+import {heightFields,crossSection,reconstruct,distanceControl,geometryError,metricDisplay,RECONSTRUCTION_DEFAULTS,RECONSTRUCTION_PROCESSING,RECONSTRUCTION_VERSION,CLOTH_DATUM} from './depth-model.js';
 const $=id=>document.getElementById(id);bindRanges();$('depth-controls').addEventListener('submit',e=>e.preventDefault());
 const surface=new Surface($('surface')),baselineSurface=new Surface($('baseline-surface'));
 for(const [a,b] of [[surface,baselineSurface],[baselineSurface,surface]])a.onViewChange=view=>{Object.assign(b,view);b.draw();};
 let source=null,processed=null,baseline=null,reference=null,name='',serial=0,loadedKind='shroud';
 let mode='brightness',reconstruction=null,control=null;
-const processingByMode={reconstruction:{smoothing:2.25,inverted:false,stretched:true,gamma:1}};
+const processingByMode={reconstruction:RECONSTRUCTION_PROCESSING};
 function refreshSimulationOption(){const stored=loadExposure();$('source').querySelector('[value="simulation"]').textContent=stored?'Latest sunlight experiment':'Sunlight experiment · example';return stored;}
 let examplePromise;
 function exampleExposure(){
@@ -52,7 +52,7 @@ function setMode(next){
   for(const id of ['brightness-presets','height-field'])$(id).hidden=distance;
   document.querySelectorAll('[data-depth-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.depthMode===mode)));
   $('processing-number').textContent=distance?'03':'02';$('display-number').textContent=distance?'04':'03';
-  $('mode-explanation').textContent=distance?'Treat tones as cloth–body gaps, then supply the missing cloth shape. An exploratory model inspired by the published claim.':'See exactly what the photograph’s tones become when treated as heights.';
+  $('mode-explanation').textContent=distance?'Assume brighter negative tones mean a smaller gap to the cloth. Subtract the gap from a chosen cloth surface to estimate the face.':'See exactly what the photograph’s tones become when treated as heights.';
   $('scale-note').textContent=distance?'One scale for x, y, and z. All millimetres are model assumptions, not measurements of the Shroud.':'Proportions preserved. Height is relative, not millimetres.';
   $('depth-limit').innerHTML=distance?'<strong>A candidate surface, not a recovered identity.</strong> This model assumes vertical gaps and unchanged image coordinates. It does not simulate cloth mechanics, unwrap lateral distortion, or add skin and anatomy. <a href="methods.html#cloth-distance">Method &amp; limits ↗</a>':'<strong>Brightness is not a depth measurement.</strong> An awkward relief does not refute a full reconstruction; a convincing one does not establish anatomy or identity. <a href="methods.html#depth">Method &amp; limits ↗</a>';
   update();
@@ -169,7 +169,7 @@ document.querySelectorAll('[data-reconstruction-preset]').forEach(button=>button
   const preset=button.dataset.reconstructionPreset;setMode('reconstruction');
   const isControl=preset==='control';
   applyReconstruction(isControl?distanceControl(12,16).settings:{...RECONSTRUCTION_DEFAULTS,cloth:preset});
-  applyProcessing({smoothing:isControl?0:2.25,gamma:1,inverted:false,stretched:!isControl});
+  applyProcessing(isControl?{smoothing:0,gamma:1,inverted:false,stretched:false}:RECONSTRUCTION_PROCESSING);
   $('comparison').value=isControl?'truth':preset==='reference'?'prior':'flat';
   document.querySelectorAll('[data-reconstruction-preset]').forEach(b=>b.classList.toggle('active',b===button));
   surface.reset();await choose(isControl?'distance':'shroud');
@@ -201,6 +201,6 @@ $('depth-data').addEventListener('click',()=>{
 });
 new ResizeObserver(profile).observe($('profile'));
 const query=new URLSearchParams(location.search),requestedSource=query.get('source');
-setMode(query.get('mode')==='reconstruction'?'reconstruction':'brightness');
+setMode(query.get('mode')==='brightness'?'brightness':'reconstruction');
 if([...$('source').options].some(option=>option.value===requestedSource))$('source').value=requestedSource;
 await choose($('source').value);
