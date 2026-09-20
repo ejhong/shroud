@@ -164,3 +164,70 @@ h1,h2,h3{ text-wrap:balance }
 /* Homepage navigation previews remain visible without scripts or WebGL. */
 .study-image .preview-image{width:100%;height:100%;object-fit:cover}
 .story-apparatus.preview-image{object-fit:contain}
+
+/* Cloth lab: known form, intrinsic cloth coordinates, and matched-scale prints. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.cloth-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px;align-items:start}
+.cloth-page fieldset{padding:0;margin:0;border:0;min-width:0}
+.cloth-page .control-panel{padding:22px}
+.cloth-choice{display:flex;border:1px solid var(--line)}
+.cloth-choice button{flex:1;border:0;padding:10px 8px;background:transparent;color:var(--soft);font-size:10px}
+.cloth-choice button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.cloth-negative{margin-top:13px}
+#cloth-reset{margin-top:24px}
+.cloth-scene-pair{display:grid;grid-template-columns:.85fr 1.4fr;background:var(--dark);overflow:hidden}
+.cloth-scene-pair figure{position:relative;min-width:0}
+.cloth-reference{border-right:1px solid #36382c}
+.cloth-scene-pair figcaption{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;color:#d0c4ab;font-size:9px;padding:16px 18px 0;min-height:50px}
+.cloth-scene-pair figcaption span+span{font-size:8px;color:#a8a58f}
+.cloth-scene-pair canvas{width:100%;height:340px;display:block;touch-action:none}
+.cloth-canvas-note{position:absolute;bottom:14px;left:18px;font:7px var(--mono);letter-spacing:.04em;color:#a8a58f;pointer-events:none}
+.cloth-playback{padding:17px 20px;display:flex;align-items:center;gap:20px;background:#25271e;color:#dcd1b9;border-top:1px solid #393b2e}
+.cloth-playback button{font:10px var(--mono);padding:13px 15px;color:#27291e;background:#d9c398;border:0;min-width:164px}
+.cloth-playback>div{flex:1;min-width:30px}
+.cloth-playback input{accent-color:#c9ac76;width:100%;margin:0;display:block}
+.cloth-playback .ends{display:flex;justify-content:space-between;font:8px var(--mono);color:#b0af9a;margin-top:6px}
+.cloth-playback output{font:10px var(--mono);width:35px;text-align:right}
+.cloth-view-tools{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;color:var(--soft);font:8px/1.6 var(--mono)}
+.cloth-view-tools>div{display:flex;gap:7px}
+.cloth-view-tools button{padding:6px 9px;font:9px var(--mono);background:transparent;border:1px solid var(--line);color:var(--soft)}
+.cloth-results{margin-top:26px}
+.cloth-results-heading{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:22px}
+.cloth-results h2{font-size:36px;margin-top:12px}
+.cloth-ruler{width:calc((100% - 18px)/14);font:8px var(--mono);color:var(--soft);white-space:nowrap;text-align:center;flex-shrink:0;margin-bottom:5px}
+.cloth-ruler>span{display:block;height:6px;border:1px solid var(--soft);border-top:0;margin-top:7px}
+.cloth-print-pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.cloth-print-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.cloth-print-title h3{font-size:26px}
+.cloth-print-title span{font:8px var(--mono);color:var(--soft)}
+.cloth-print-pair canvas{display:block;width:100%;height:auto;aspect-ratio:700/296;background:#e9ddc3;border:1px solid #d5c8ae}
+.cloth-print-pair figcaption{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin-top:16px;align-items:baseline;font-size:8px}
+.cloth-print-pair figcaption strong{font:34px var(--serif);letter-spacing:-.04em;color:var(--ink);font-weight:400}
+.cloth-print-pair figcaption span:nth-child(2){grid-column:1;grid-row:2}
+.cloth-print-pair figcaption span:last-child{grid-column:2;grid-row:1;color:var(--copper);font-size:9px}
+.cloth-result-note{font:9px/1.8 var(--mono);color:var(--soft);margin-top:21px;max-width:700px}
+.cloth-section-panel{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:24px 0;margin-top:25px}
+.cloth-section-panel h3{font-size:28px;margin:14px 0 12px;max-width:280px}
+.cloth-section-panel p{font-size:18px;color:var(--soft);max-width:400px}
+.cloth-section-panel canvas{width:100%;height:240px;display:block}
+.cloth-section-key{display:flex;gap:18px;font:8px var(--mono);color:var(--soft);margin-top:17px}
+.cloth-section-key span{display:flex;align-items:center;gap:6px}
+.cloth-section-key span::before{content:'';width:13px;height:3px;background:#d5bd99}
+.cloth-section-key span+span::before{background:#6b7559}
+.cloth-limit{padding-bottom:0}
+.cloth-source{display:grid;grid-template-columns:1fr 1.2fr;gap:80px;border-top:1px solid var(--line);padding:48px 0 65px}
+.cloth-source h2{font-size:42px;margin-top:18px}
+.cloth-source p{font-size:19px;color:var(--soft)}
+.cloth-source .text-link{display:inline-block;margin-top:23px}
+/* Third lab keeps the main inquiry's original pair and adds a compact wide card. */
+.study-card.cloth-study{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;column-gap:30px;margin-top:4px}
+.cloth-study>.eyebrow{grid-column:1/-1}
+.cloth-study .study-image{grid-row:2/5;height:285px}
+.cloth-study .study-title{margin-top:18px}
+.cloth-study .study-summary{align-self:start}
+.cloth-study .caption{margin-bottom:15px}
+@media(max-width:1050px){.site-header nav{gap:19px}.cloth-layout{grid-template-columns:220px minmax(0,1fr);gap:20px}.cloth-page .control-panel{padding:17px}.cloth-scene-pair{grid-template-columns:1fr 1.25fr}.cloth-scene-pair canvas{height:300px}.cloth-scene-pair figcaption{font-size:8px;padding-inline:12px}.cloth-canvas-note{font-size:6px;left:12px}.cloth-playback{gap:12px;padding:14px}.cloth-playback button{min-width:145px;font-size:9px;padding:12px}.cloth-print-title{display:block}.cloth-print-title span{display:block;margin-top:8px}.cloth-print-pair figcaption strong{font-size:28px}.cloth-section-panel{gap:18px}.cloth-section-panel h3{font-size:26px}.cloth-source{gap:40px}.cloth-source h2{font-size:37px}}
+@media(max-width:800px){.site-header nav{gap:13px;font-size:9px}.cloth-layout{grid-template-columns:1fr}.cloth-layout .control-panel{display:block;order:2;padding:24px}.cloth-page fieldset{display:grid;grid-template-columns:1fr 1fr;gap:26px}.cloth-page .control-section+.control-section{border:0;margin:0;padding:0}.cloth-page #cloth-reset{align-self:end}.cloth-page .support-link{margin-top:18px}.cloth-scene-pair canvas{height:335px}.cloth-layout .workspace{order:1}.cloth-print-title{display:flex}.cloth-section-panel canvas{height:230px}.cloth-study .study-image{height:255px}.cloth-study .study-title h3{font-size:28px}}
+@media(max-width:600px){.site-header nav{display:grid;grid-template-columns:repeat(3,max-content);gap:0 18px;justify-content:space-between;font-size:9px}.site-header nav a{padding:9px 0}.cloth-page .lab-header h1{font-size:45px}.cloth-page .lab-jumps{gap:13px;font-size:8px}.cloth-layout{gap:28px}.cloth-scene-pair{grid-template-columns:.95fr 1.15fr}.cloth-scene-pair canvas{height:250px}.cloth-scene-pair figcaption{display:block;font-size:8px;padding:13px 10px 0;min-height:51px}.cloth-scene-pair figcaption span+span{display:block;font-size:7px;margin-top:4px}.cloth-canvas-note{left:10px;bottom:11px;right:8px;line-height:1.6}.cloth-playback{padding:14px 12px;gap:12px;flex-wrap:wrap}.cloth-playback button{min-width:0;font-size:9px;padding:12px 10px}.cloth-playback output{width:28px;font-size:8px}.cloth-view-tools{font-size:7px;gap:12px}.cloth-view-tools>span{max-width:190px}.cloth-view-tools button{min-height:32px;font-size:8px;padding:7px}.cloth-results-heading{align-items:center;gap:10px}.cloth-results-heading .eyebrow{font-size:8px}.cloth-results h2{font-size:30px;max-width:230px}.cloth-ruler{width:calc(100% / 7);font-size:7px}.cloth-print-pair{grid-template-columns:1fr;gap:25px}.cloth-print-title{display:flex;padding:13px 0}.cloth-print-title h3{font-size:28px}.cloth-print-title span{margin:0;font-size:9px}.cloth-print-pair figcaption{margin-top:12px}.cloth-print-pair figcaption strong{font-size:32px}.cloth-print-pair figcaption span:last-child{font-size:10px}.cloth-result-note{font-size:9px;margin-top:22px}.cloth-section-panel{grid-template-columns:1fr;gap:10px;margin-top:24px;padding:22px 0 15px}.cloth-section-panel h3{font-size:29px;max-width:100%}.cloth-section-panel p{font-size:19px}.cloth-section-panel canvas{height:220px}.cloth-page fieldset{display:block}.cloth-page .control-section+.control-section{padding-top:22px;margin-top:24px;border-top:1px solid var(--line)}.cloth-choice button{font-size:11px;padding:12px}.cloth-source{grid-template-columns:1fr;gap:24px;padding:35px 0 45px}.cloth-source h2{font-size:35px}.study-card.cloth-study{display:block;margin:0}.cloth-study .study-image{height:270px}.cloth-study .study-title h3{font-size:33px}.cloth-study .caption{margin-bottom:0}}
+
+@media(max-width:600px){.cloth-scene-pair{grid-template-columns:1fr}.cloth-reference{border-right:0;border-bottom:1px solid #36382c}.cloth-scene-pair .cloth-reference canvas{height:235px}.cloth-scene-pair .cloth-moving canvas{height:250px}.cloth-scene-pair figcaption{display:flex;min-height:39px}.cloth-scene-pair figcaption span+span{margin-top:0}.cloth-canvas-note{font-size:7px}}

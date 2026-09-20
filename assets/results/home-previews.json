@@ -29,5 +29,19 @@
     "north": -0.3,
     "up": 0.866
   },
-  "method": "Unedited canvas renders from the same modules used by the labs."
+  "method": "Unedited canvas renders from the same modules used by the labs.",
+  "cloth": {
+    "model": "cloth-strips-1",
+    "settings": {
+      "drape": 0.9,
+      "relief": 0.15,
+      "reach": 25,
+      "transfer": "distance",
+      "slice": 65
+    },
+    "source": "moraes-head-front-1",
+    "sourceSHA256": "c70e4a6c2625edcad8bb2bcfa4638bdea2dccb0d3e8ba202f2ca4221b53e912a",
+    "unfold": 0.55,
+    "method": "Reference head and cloth rendered by the live model; comparison uses the default app export."
+  }
 }

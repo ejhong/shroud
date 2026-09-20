@@ -45,7 +45,7 @@ try{
   await client.evaluate(`document.querySelector('#experiments').scrollIntoView()`);await screenshot('experiments-desktop.png');
   // Navigation previews must remain visible even when all page scripts fail.
   async function assertHomePreviews(){
-    const images=await client.evaluate(`Promise.all(['home-apparatus','home-depth','story-apparatus'].map(async id=>{
+    const images=await client.evaluate(`Promise.all(['home-apparatus','home-depth','home-cloth','story-apparatus'].map(async id=>{
       const image=document.getElementById(id);image.loading='eager';await image.decode();
       const canvas=document.createElement('canvas');canvas.width=120;canvas.height=65;
       const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0,120,65);
@@ -188,6 +188,44 @@ try{
   await click('[data-depth-mode="brightness"]');
   await click('[data-depth-preset="raw"]');await until(surfacesMatch);
   assert.equal(await client.evaluate(`document.body.dataset.depthMode`),'brightness');
+  // Forward cloth geometry: known controls, animation, matched-scale prints, and exports.
+  await navigate('cloth.html');await until(ready);await screenshot('cloth-desktop.png');await screenshot('cloth-full.png',true);
+  assert.equal(await client.evaluate(`document.body.dataset.clothShape`),'head');
+  assert.ok(await client.evaluate(`Number(document.getElementById('head-span').dataset.value)>155&&Number(document.getElementById('relief-span').dataset.value)<123`));
+  const defaultImprints=await client.evaluate(`['head-imprint','relief-imprint'].map(id=>document.getElementById(id).toDataURL())`);
+  await click('#cloth-play');assert.equal(await client.evaluate(`document.getElementById('cloth-unfold').value`),'100');
+  assert.deepEqual(await client.evaluate(`['head-imprint','relief-imprint'].map(id=>document.getElementById(id).toDataURL())`),defaultImprints,'Unfolding moves existing image values; it must not regenerate the image');
+  await client.evaluate(`document.getElementById('cloth-stage').scrollIntoView()`);await screenshot('cloth-unfolded.png');
+  await click('#cloth-play');assert.equal(await client.evaluate(`document.getElementById('cloth-unfold').value`),'0');
+  await input('cloth-drape',0);assert.ok(await client.evaluate(`['head-span','relief-span'].every(id=>Math.abs(Number(document.getElementById(id).dataset.value)-120)<1e-6)`));
+  await input('cloth-drape',90);await input('relief-depth',100);
+  assert.equal(await client.evaluate(`document.getElementById('head-imprint').toDataURL()===document.getElementById('relief-imprint').toDataURL()`),true,'Equal forms must give identical imprints');
+  await input('relief-depth',15);await click('[data-shape="relief"]');assert.equal(await client.evaluate(`document.body.dataset.clothShape`),'relief');
+  await screenshot('cloth-relief.png');
+  await input('cloth-transfer','contact','change');assert.equal(await client.evaluate(`document.getElementById('reach-field').hidden`),true);
+  assert.notEqual(await client.evaluate(`document.getElementById('head-imprint').toDataURL()`),defaultImprints[0]);
+  await click('#cloth-guides');await click('#cloth-negative');await screenshot('cloth-contact-guides.png');
+  await click('#cloth-reset');assert.equal(await client.evaluate(`document.getElementById('cloth-guides').checked||document.getElementById('cloth-negative').checked`),false);
+  assert.deepEqual(await client.evaluate(`['head-imprint','relief-imprint'].map(id=>document.getElementById(id).toDataURL())`),defaultImprints);
+  const originalClothView=await client.evaluate(`document.getElementById('cloth-surface').toDataURL()`);
+  await client.evaluate(`document.getElementById('cloth-surface').dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}))`);
+  assert.notEqual(await client.evaluate(`document.getElementById('cloth-surface').toDataURL()`),originalClothView);
+  await click('#cloth-front');await click('#cloth-oblique');
+  // Exercise the timed animation as well as the reduced-motion endpoint behavior.
+  await client.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
+  await click('#cloth-play');await until(`Number(document.getElementById('cloth-unfold').value)>0&&Number(document.getElementById('cloth-unfold').value)<100`);await click('#cloth-play');
+  const paused=await client.evaluate(`document.getElementById('cloth-unfold').value`);await wait(150);assert.equal(await client.evaluate(`document.getElementById('cloth-unfold').value`),paused);
+  await client.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});await click('#cloth-reset');
+  await click('#cloth-export');await click('#cloth-data');await wait(600);
+  const clothExport=JSON.parse(await readFile(join(downloads,'shroud-cloth-model.json'),'utf8'));
+  assert.equal(clothExport.model,'cloth-strips-1');assert.equal(clothExport.source.license,'CC BY 4.0');assert.equal(clothExport.settings.slice,65);
+  assert.equal(clothExport.coordinates.clothWidth,700);assert.equal(clothExport.head.signal.length,clothExport.head.width*clothExport.head.height);
+  const {buildCloth}=await import('../js/cloth-model.js');
+  assert.deepEqual(clothExport.head.signal,Array.from(buildCloth(clothExport.source,clothExport.settings,1).signal),'Downloaded signals reproduce exactly outside the browser');
+  assert.deepEqual(clothExport.relief.signal,Array.from(buildCloth(clothExport.source,clothExport.settings,.15).signal));
+  const clothPNG=await readFile(join(downloads,'shroud-cloth-comparison.png'));assert.equal(clothPNG.readUInt32BE(16),1400);assert.equal(clothPNG.readUInt32BE(20),880);
+  for(const width of [390,320]){await navigate('cloth.html',width,844);await until(ready);await screenshot('cloth-mobile-'+width+'.png');await screenshot('cloth-mobile-full-'+width+'.png',true);await client.evaluate(`document.getElementById('cloth-controls').scrollIntoView()`);await screenshot('cloth-controls-'+width+'.png');assert.ok(await client.evaluate('document.documentElement.scrollWidth<=innerWidth+1'));}
+
   await navigate('methods.html');await screenshot('methods-desktop.png');
   await navigate('research.html');await screenshot('research-desktop.png');
   assert.equal(await client.evaluate(`document.querySelectorAll('.agenda-list').length`),1);
@@ -207,8 +245,8 @@ try{
   assert.equal(await client.evaluate(`document.querySelectorAll('.research-project[open]').length`),10);
   await client.evaluate(`dispatchEvent(new Event('afterprint'))`);
   assert.deepEqual(await client.evaluate(`[...document.querySelectorAll('.research-project')].map(study=>study.open)`),disclosureState);
-  for(const path of ['index.html','shadow.html','depth.html','methods.html','research.html']){
-    await navigate(path,390,844);if(path==='shadow.html'||path==='depth.html')await until(ready);
+  for(const path of ['index.html','shadow.html','depth.html','cloth.html','methods.html','research.html']){
+    await navigate(path,390,844);if(['shadow.html','depth.html','cloth.html'].includes(path))await until(ready);
     await screenshot(path.replace('.html','')+'-mobile.png');await screenshot(path.replace('.html','')+'-mobile-full.png',true);
     assert.ok(await client.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),`Late horizontal overflow: ${path}`);
   }
@@ -232,8 +270,11 @@ try{
   assert.equal(await client.evaluate(`document.getElementById('gap').value`),'60');assert.equal(await client.evaluate(`document.getElementById('days').value`),'1');
   // The renderer remains usable on browsers without WebGL.
   const {identifier}=await client.send('Page.addScriptToEvaluateOnNewDocument',{source:`const originalContext=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return type==='webgl'?null:originalContext.call(this,type,...args);};`});
-  await navigate('depth.html',390,844);await until(ready);assert.equal(await client.evaluate(`document.getElementById('surface').dataset.fallback`),'true');await screenshot('cloth-reconstruction-fallback.png');await click('[data-depth-mode="brightness"]');await screenshot('depth-fallback.png');await click('[data-depth-mode="reconstruction"]');assert.ok(await client.evaluate(`document.getElementById('processing-note').textContent.includes('physical scale')`));await client.send('Page.removeScriptToEvaluateOnNewDocument',{identifier});
+  await navigate('depth.html',390,844);await until(ready);assert.equal(await client.evaluate(`document.getElementById('surface').dataset.fallback`),'true');await screenshot('cloth-reconstruction-fallback.png');await click('[data-depth-mode="brightness"]');await screenshot('depth-fallback.png');await click('[data-depth-mode="reconstruction"]');assert.ok(await client.evaluate(`document.getElementById('processing-note').textContent.includes('physical scale')`));await navigate('cloth.html',390,844);await until(ready);assert.equal(await client.evaluate(`document.getElementById('cloth-surface').dataset.fallback`),'true');
+  await client.evaluate(`document.getElementById('cloth-stage').scrollIntoView()`);await screenshot('cloth-canvas-fallback.png');await click('#cloth-play');assert.equal(await client.evaluate(`document.getElementById('cloth-unfold').value`),'100');
+  assert.ok(await client.evaluate(`(()=>{const c=document.getElementById('cloth-surface'),p=c.getContext('2d').getImageData(0,0,c.width,c.height).data;let n=0;for(let i=0;i<p.length;i+=4)if(p[i]+p[i+1]+p[i+2]>250)n++;return n>2000;})()`),'The fallback must draw visible cloth');
+  await client.send('Page.removeScriptToEvaluateOnNewDocument',{identifier});
   const exceptions=client.events.filter(e=>e.method==='Runtime.exceptionThrown');assert.deepEqual(exceptions,[],'Uncaught JavaScript exceptions');
   const bad=client.events.filter(e=>e.method==='Network.responseReceived'&&e.params.response.url.startsWith(base.origin)&&e.params.response.status>=400).map(e=>e.params.response.url);assert.deepEqual(bad,[],'Failed local requests');
-  console.log(`Browser checks passed: desktop/mobile layouts, original painting and physical-result assets, photo inversion, physical controls, playback, painting/undo, six comparisons, target fitting, JSON export/import, image upload, automatic cross-page persistence, first-visit example, WebGL and its fallback, linked height comparisons, vertical sections, unified research agenda, deep links, print restoration, synthetic controls, cloth inversion, explicit shape priors, fixed known-distance recovery, physical scale, reconstruction exports, 320px layouts, the default cloth reconstruction, direct-relief links, and nonblank homepage previews with JavaScript disabled.\nScreenshots: ${screenshots}\nDownloads: ${downloads}`);
+  console.log(`Browser checks passed: desktop/mobile layouts, original painting and physical-result assets, photo inversion, physical controls, playback, painting/undo, six comparisons, target fitting, JSON export/import, image upload, automatic cross-page persistence, first-visit example, WebGL and its fallback, linked height comparisons, vertical sections, unified research agenda, deep links, print restoration, synthetic controls, cloth inversion, explicit shape priors, fixed known-distance recovery, physical scale, reconstruction exports, 320px layouts, the default cloth reconstruction, direct-relief links, nonblank homepage previews with JavaScript disabled, cloth unwrapping, matched-scale imprints, transfer controls, timed and reduced-motion playback, and exactly reproducible cloth exports.\nScreenshots: ${screenshots}\nDownloads: ${downloads}`);
 }finally{client?.close();browserClient?.close();browser.kill('SIGTERM');}

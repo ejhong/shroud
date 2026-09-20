@@ -2,7 +2,7 @@ import {readFile,stat} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {resolve,dirname} from 'node:path';
 const root=resolve(new URL('..',import.meta.url).pathname);
-const pages=['index.html','shadow.html','depth.html','methods.html','research.html'];
+const pages=['index.html','shadow.html','depth.html','cloth.html','methods.html','research.html'];
 let count=0;
 for(const page of pages){
   const content=await readFile(resolve(root,page),'utf8');

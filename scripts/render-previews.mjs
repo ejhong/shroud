@@ -53,6 +53,24 @@ try {
     const save=canvas=>{const copy=document.createElement('canvas');copy.width=canvas.width;copy.height=canvas.height;const ctx=copy.getContext('2d');ctx.drawImage(canvas,0,0);const pixels=ctx.getImageData(0,0,copy.width,copy.height).data;let visible=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i]+pixels[i+1]+pixels[i+2]>150)visible++;return {width:canvas.width,height:canvas.height,visible,png:canvas.toDataURL('image/png').split(',')[1]};};
     return {images:{'home-sunlight.png':save(sunlight),'home-depth-curved.png':save(depth),'home-apparatus.png':save(story)},record:{model:RECONSTRUCTION_VERSION,source:'assets/images/face-negative.jpg',width:input.width,height:input.height,processing:RECONSTRUCTION_PROCESSING,reconstruction:reconstruction.settings,camera:{yaw:surface.yaw,pitch:surface.pitch,zoom:surface.zoom},sun,method:'Unedited canvas renders from the same modules used by the labs.'}};
   })()`);
+  await send('Page.navigate',{url:new URL('cloth.html',base).href});
+  for(let i=0;i<150;i++){if(await evaluate(`document.body.dataset.ready==='true'&&location.pathname.endsWith('/cloth.html')`))break;await new Promise(resolve=>setTimeout(resolve,100));}
+  const clothResult=await evaluate(`(async()=>{
+    const {comparisonImage}=await import('./js/cloth.js?v=cloth-1');
+    const {ClothView,drawImprint}=await import('./js/cloth-visuals.js?v=cloth-1');
+    const {CLOTH_VERSION,CLOTH_DEFAULTS,buildCloth,headMesh,clothMesh}=await import('./js/cloth-model.js?v=cloth-1');
+    const source=await(await fetch('assets/models/moraes-head.json')).json(),model=buildCloth(source);
+    await document.fonts.ready;
+    const create=(width)=>{const canvas=document.createElement('canvas');canvas.style.cssText='display:block;width:'+width+'px;height:325px;';document.body.append(canvas);return canvas;};
+    const head=create(230),cloth=create(370),texture=document.createElement('canvas');
+    const form=new ClothView(head,{frameHeight:365,centerZ:model.peak*.48,yaw:-.35,pitch:-.2});form.setMesh(headMesh(source));
+    const fabric=new ClothView(cloth,{frameHeight:365,frameWidth:710,centerZ:model.peak*.48*.45,yaw:-.28,pitch:-.5});
+    drawImprint(texture,model);fabric.setTexture(texture);fabric.setMesh(clothMesh(model,.55));
+    const home=document.createElement('canvas');home.width=1200;home.height=650;const ctx=home.getContext('2d');ctx.drawImage(head,0,0,460,650);ctx.drawImage(cloth,460,0,740,650);
+    const save=canvas=>{const ctx=canvas.getContext('2d'),pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;let visible=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i]+pixels[i+1]+pixels[i+2]>150)visible++;return {width:canvas.width,height:canvas.height,visible,png:canvas.toDataURL('image/png').split(',')[1]};};
+    return {images:{'home-cloth.png':save(home),'cloth-comparison.png':save(comparisonImage())},record:{model:CLOTH_VERSION,settings:CLOTH_DEFAULTS,source:source.id,sourceSHA256:source.sha256,unfold:.55,method:'Reference head and cloth rendered by the live model; comparison uses the default app export.'}};
+  })()`);
+  Object.assign(result.images,clothResult.images);result.record.cloth=clothResult.record;
   const output=new URL('../assets/results/',import.meta.url);await mkdir(output,{recursive:true});
   for(const [name,image] of Object.entries(result.images)){
     assert.ok(image.visible>10000,`Blank preview: ${name}`);
