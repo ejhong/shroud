@@ -27,6 +27,31 @@ button:disabled{opacity:.5;cursor:default}.mobile-jumps,.mobile-only{display:non
 @media(max-width:1000px){.research-header-bottom{gap:35px}.research-header-bottom .button{font-size:9px;padding:14px}.funding-intro,.research-common{gap:40px}.shadow-stages{gap:22px;padding:26px}.shadow-stages section+section{padding-left:22px}.shadow-stages h3{font-size:27px}.project-columns{gap:27px}.research-invitation{gap:30px}.research-invitation .button{font-size:9px;padding:14px}}
 @media(max-width:800px){.research-header-bottom{display:block}.research-header-actions{margin-top:25px}.research-project>summary{grid-template-columns:46px minmax(0,1fr) 25px;gap:18px}.project-body{padding:25px}.project-columns{grid-template-columns:1fr;gap:25px}.shadow-stages{grid-template-columns:1fr;gap:26px;padding:27px}.shadow-stages section+section{border-left:0;border-top:1px solid #454538;padding:26px 0 0}.stage-number{float:left;margin-right:18px;font-size:36px}.shadow-stages .eyebrow{padding-top:7px}.shadow-stages h3{font-size:31px;margin:12px 0 18px}.shadow-stages p{clear:both}.research-sources{column-gap:35px}.research-invitation{display:block}.research-invitation .button{display:inline-flex;margin-top:25px}}
 @media(max-width:600px){.site-header nav{gap:8px;font-size:8px}.research-header{padding:36px 0 30px}.research-header .eyebrow{font-size:8px}.research-header h1{font-size:53px;margin:22px 0}.research-deck{font-size:24px}.research-header-bottom{margin-top:24px}.research-header-bottom p{font-size:19px}.funding-intro,.research-common{grid-template-columns:1fr;gap:23px;padding:35px 0}.funding-intro h2,.research-common h2{font-size:36px}.agenda{padding-bottom:32px}.agenda-heading{display:block}.agenda-heading h2{font-size:32px}.agenda-heading p{margin-top:15px;max-width:100%}.research-project>summary{grid-template-columns:30px minmax(0,1fr) 18px;gap:10px;padding:23px 0}.research-rank{font-size:30px;padding-top:2px}.agenda-summary>strong{font-size:25px}.agenda-question{font-size:18px;margin-top:10px}.agenda-access{font-size:8px}.research-project>summary::after{font-size:19px;padding-top:1px}.project-body{padding:22px 19px;margin-bottom:22px}.project-body>.eyebrow{font-size:8px;line-height:1.8}.research-evidence{font-size:18px}.project-columns h3{font-size:25px}.project-columns p{font-size:18px}.project-deliverable{grid-template-columns:1fr;gap:10px;margin-top:25px}.project-deliverable a{grid-column:1;margin-top:5px}.project-deliverable p{font-size:19px}.research-position{padding-left:17px}.research-position p{font-size:21px}.shadow-stages{padding:21px}.shadow-stages h3{font-size:28px}.shadow-stages p{font-size:18px}.stage-output{font-size:18px}.research-test-table{margin:28px 0 20px}.research-test-table table{font-size:16px;min-width:670px}.research-test-table caption{font-size:27px;max-width:265px}.research-test-table th,.research-test-table td{padding:14px}.research-reading h2{font-size:36px}.research-sources{grid-template-columns:1fr;padding-left:23px}.research-sources li{font-size:18px}.research-reading{padding:10px 0 20px}.research-invitation{padding:33px 0}.research-invitation h2{font-size:37px}.research-invitation p{font-size:20px}.research-lab-link h2{font-size:31px}.research-lab-link{padding-top:30px}}
+/* Two distinct inverse questions, with every added shape visible. */
+.depth-modes{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);max-width:720px}
+.depth-modes button{padding:16px 22px;background:transparent;color:var(--soft);border:0;text-align:left;font:24px/1.2 var(--serif)}
+.depth-modes button+button{border-left:1px solid var(--line)}
+.depth-modes button span{display:block;font:9px/1.7 var(--mono);margin-bottom:7px;letter-spacing:.04em}
+.depth-modes button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.depth-modes button[aria-pressed=true] span{color:#d5b28b}
+.mode-explanation{font-size:18px;color:var(--soft);max-width:780px;margin:15px 0 20px}
+.reconstruction-equation{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px;padding:15px;background:#23251e;color:#c5bea9;font:10px/1.7 var(--mono);border-bottom:1px solid #454638}
+.reconstruction-equation span:first-child{color:#d5ac85}
+.reconstruction-finding{padding:20px 24px;background:var(--paper2);border-left:2px solid var(--copper);margin:20px 0}
+.reconstruction-finding p{font-size:18px;line-height:1.5;margin:10px 0}
+.reconstruction-finding a{font:9px var(--mono);color:var(--copper)}
+.profile-legend{flex-wrap:wrap;row-gap:9px}
+.profile-legend .cloth-key{color:#8c7955}
+.profile-legend .cloth-key:before{border-top-style:dotted}
+#arched-controls>.field:last-child,#reference-controls>.field:last-child{margin-bottom:19px}
+@media(max-width:600px){
+  .depth-modes button{padding:14px 13px;font-size:21px}
+  .depth-modes button span{font-size:8px;letter-spacing:0}
+  .mode-explanation{font-size:17px}
+  .reconstruction-equation{gap:6px;font-size:9px;padding:12px}
+  .reconstruction-finding{padding:18px}
+  .reconstruction-finding p{font-size:17px}
+}
 /* Shorter reading paths, with the experiments and their evidence in view. */
 h1,h2,h3{ text-wrap:balance }
 .inquiry-page .hero{padding-top:52px;padding-bottom:48px}

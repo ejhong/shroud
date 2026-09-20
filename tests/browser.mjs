@@ -119,6 +119,47 @@ try{
   const {root:depthDocument}=await client.send('DOM.getDocument');const {nodeId:uploadNode}=await client.send('DOM.querySelector',{nodeId:depthDocument.nodeId,selector:'#depth-upload'});
   await client.send('DOM.setFileInputFiles',{nodeId:uploadNode,files:[resolve('assets/images/face-negative.jpg')]});await until(`document.getElementById('source').value==='upload'&&document.getElementById('status').textContent==='Uploaded image loaded.'`);
   await input('source','known','change');await until(`document.getElementById('source').value==='known'&&document.querySelector('#surface-label').textContent.includes('KNOWN DEPTH')`);
+  // The cloth inverse is an additional mode; direct relief retains its behavior.
+  await navigate('depth.html?mode=reconstruction');await until(ready);
+  assert.equal(await client.evaluate(`document.querySelector('[data-depth-mode="reconstruction"]').getAttribute('aria-pressed')`),'true');
+  assert.equal(await client.evaluate(`document.getElementById('cloth-controls').hidden`),false);
+  assert.equal(await client.evaluate(`document.getElementById('height-field').hidden`),true);
+  assert.equal(await client.evaluate(`document.getElementById('smooth').value`),'2.25');
+  await client.evaluate(`document.getElementById('height-lab').scrollIntoView()`);await screenshot('cloth-reconstruction-desktop.png');
+  assert.ok(!await client.evaluate(surfacesMatch),'Curved cloth must change geometry relative to the flat-cloth candidate');
+  await input('cloth-shape','flat','change');assert.ok(await client.evaluate(surfacesMatch));
+  await input('cloth-shape','arched','change');await input('comparison','cloth','change');
+  assert.ok(await client.evaluate(`document.getElementById('baseline-title').textContent.includes('Assumed cloth')`));
+  await click('#side');await screenshot('cloth-and-body-profile.png');await click('#orbit-reset');
+  await click('[data-reconstruction-preset="reference"]');await until(`${ready}&&document.getElementById('cloth-shape').value==='reference'&&document.getElementById('surface-label').textContent.includes('SHROUD FACE')`);
+  assert.equal(await client.evaluate(`document.getElementById('comparison').value`),'prior');
+  assert.equal(await client.evaluate(`document.getElementById('reference-controls').hidden`),false);
+  await screenshot('reference-assisted-reconstruction.png');
+  await click('#depth-data');await wait(300);
+  const reconstruction=JSON.parse(await readFile(join(downloads,'shroud-cloth-reconstruction.json'),'utf8'));
+  assert.equal(reconstruction.model,'cloth-distance-1');assert.equal(reconstruction.reconstruction.cloth,'reference');
+  assert.equal(reconstruction.body.length,reconstruction.width*reconstruction.height);
+  assert.equal(reconstruction.suppliedHead.length,reconstruction.body.length);
+  assert.ok(reconstruction.body.every((z,i)=>Math.abs(z-(reconstruction.cloth[i]-reconstruction.gap[i]))<.00001));
+  assert.equal(reconstruction.coordinates.lateralUnwrapping,false);assert.equal(reconstruction.control,null);
+  await rename(join(downloads,'shroud-cloth-reconstruction.json'),join(downloads,'reference-reconstruction.json'));
+  await click('[data-reconstruction-preset="control"]');await until(`${ready}&&Number(document.getElementById('agreement').dataset.rmse)<0.00001`);
+  assert.equal(await client.evaluate(`document.getElementById('comparison').value`),'truth');
+  assert.equal(await client.evaluate(`document.getElementById('stretch').checked`),false);
+  const fixedControlSource=await client.evaluate(`document.getElementById('depth-source').toDataURL()`);
+  await screenshot('cloth-known-geometry.png');
+  await input('cloth-side',0);assert.ok(await client.evaluate(`Number(document.getElementById('agreement').dataset.rmse)>10`));
+  assert.equal(await client.evaluate(`document.getElementById('depth-source').toDataURL()`),fixedControlSource,'Inverse settings must not regenerate the test photograph');
+  await click('[data-reconstruction-preset="control"]');await until(`${ready}&&Number(document.getElementById('agreement').dataset.rmse)<0.00001`);
+  await input('distance-law','exponential','change');assert.ok(await client.evaluate(`Number(document.getElementById('agreement').dataset.rmse)>5`));
+  await click('[data-reconstruction-preset="control"]');await until(`${ready}&&Number(document.getElementById('agreement').dataset.rmse)<0.00001`);
+  await click('#depth-data');await wait(300);
+  const recovered=JSON.parse(await readFile(join(downloads,'shroud-cloth-reconstruction.json'),'utf8'));
+  assert.ok(recovered.control.error.max<.00001);assert.notDeepEqual(recovered.original,recovered.body);
+  await click('[data-depth-mode="brightness"]');assert.equal(await client.evaluate(`document.getElementById('cloth-controls').hidden`),true);
+  await click('[data-depth-mode="reconstruction"]');assert.ok(await client.evaluate(`Number(document.getElementById('agreement').dataset.rmse)<0.00001`));
+  await click('[data-depth-preset="raw"]');await until(surfacesMatch);
+  assert.equal(await client.evaluate(`document.body.dataset.depthMode`),'brightness');
   await navigate('methods.html');await screenshot('methods-desktop.png');
   await navigate('research.html');await screenshot('research-desktop.png');
   assert.equal(await client.evaluate(`document.querySelectorAll('.agenda-list').length`),1);
@@ -143,6 +184,13 @@ try{
     await screenshot(path.replace('.html','')+'-mobile.png');await screenshot(path.replace('.html','')+'-mobile-full.png',true);
     assert.ok(await client.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),`Late horizontal overflow: ${path}`);
   }
+  for(const width of [390,320]){
+    await navigate('depth.html?mode=reconstruction',width,844);await until(ready);
+    await client.evaluate(`document.getElementById('height-lab').scrollIntoView()`);await screenshot('cloth-reconstruction-mobile-'+width+'.png');
+    await click('[data-reconstruction-preset="reference"]');await until(`${ready}&&document.getElementById('comparison').value==='prior'`);
+    await client.evaluate(`document.getElementById('depth-controls').scrollIntoView()`);await screenshot('cloth-controls-mobile-'+width+'.png');
+    assert.ok(await client.evaluate('document.documentElement.scrollWidth<=innerWidth+1'));
+  }
   await navigate('research.html#shadow-test',390,844);
   await until(`document.getElementById('shadow-test').open`);
   await client.evaluate(`document.querySelector('.shadow-stages').scrollIntoView()`);await screenshot('research-protocol-mobile.png');
@@ -156,8 +204,8 @@ try{
   assert.equal(await client.evaluate(`document.getElementById('gap').value`),'60');assert.equal(await client.evaluate(`document.getElementById('days').value`),'1');
   // The renderer remains usable on browsers without WebGL.
   const {identifier}=await client.send('Page.addScriptToEvaluateOnNewDocument',{source:`const originalContext=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return type==='webgl'?null:originalContext.call(this,type,...args);};`});
-  await navigate('depth.html',390,844);await until(ready);assert.equal(await client.evaluate(`document.getElementById('surface').dataset.fallback`),'true');await screenshot('depth-fallback.png');await client.send('Page.removeScriptToEvaluateOnNewDocument',{identifier});
+  await navigate('depth.html',390,844);await until(ready);assert.equal(await client.evaluate(`document.getElementById('surface').dataset.fallback`),'true');await screenshot('depth-fallback.png');await click('[data-depth-mode="reconstruction"]');await screenshot('cloth-reconstruction-fallback.png');assert.ok(await client.evaluate(`document.getElementById('processing-note').textContent.includes('physical scale')`));await client.send('Page.removeScriptToEvaluateOnNewDocument',{identifier});
   const exceptions=client.events.filter(e=>e.method==='Runtime.exceptionThrown');assert.deepEqual(exceptions,[],'Uncaught JavaScript exceptions');
   const bad=client.events.filter(e=>e.method==='Network.responseReceived'&&e.params.response.url.startsWith(base.origin)&&e.params.response.status>=400).map(e=>e.params.response.url);assert.deepEqual(bad,[],'Failed local requests');
-  console.log(`Browser checks passed: desktop/mobile layouts, original painting and physical-result assets, photo inversion, physical controls, playback, painting/undo, six comparisons, target fitting, JSON export/import, image upload, automatic cross-page persistence, first-visit example, WebGL and its fallback, linked height comparisons, vertical sections, unified research agenda, deep links, print restoration, and synthetic controls.\nScreenshots: ${screenshots}\nDownloads: ${downloads}`);
+  console.log(`Browser checks passed: desktop/mobile layouts, original painting and physical-result assets, photo inversion, physical controls, playback, painting/undo, six comparisons, target fitting, JSON export/import, image upload, automatic cross-page persistence, first-visit example, WebGL and its fallback, linked height comparisons, vertical sections, unified research agenda, deep links, print restoration, synthetic controls, cloth inversion, explicit shape priors, fixed known-distance recovery, physical scale, reconstruction exports, and 320px layouts.\nScreenshots: ${screenshots}\nDownloads: ${downloads}`);
 }finally{client?.close();browserClient?.close();browser.kill('SIGTERM');}

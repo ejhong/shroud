@@ -46,7 +46,7 @@ export function bindRanges(root=document) {
   });
 }
 
-/** A compact, accessible WebGL height-field viewer with an orthographic fallback. */
+/** A compact, accessible WebGL height-field viewer with a line-surface fallback. */
 export class Surface {
   constructor(canvas,{height=.65,yaw=-.34,pitch=-.45,mode=0}={}) {
     this.canvas=canvas;this.height=height;this.yaw=yaw;this.pitch=pitch;this.mode=mode;this.zoom=1;
@@ -121,14 +121,16 @@ export class Surface {
   }
   fallback() {
     const ctx=this.ctx,c=this.canvas;ctx.fillStyle='#181914';ctx.fillRect(0,0,c.width,c.height);if(!this.data)return;
-    // Projected scan lines still expose the height field without WebGL.
+    // Match the WebGL coordinates, camera, and physical scale without WebGL.
     ctx.strokeStyle='#c6ac80';ctx.lineWidth=1;
+    const aspect=this.width/this.heightPixels,fit=1/Math.max(1,aspect);
     for(let y=0;y<this.heightPixels;y+=4){ctx.beginPath();for(let x=0;x<this.width;x+=2){
-      let px=(x/this.width-.5)*c.width*.62,py=(y/this.heightPixels-.5)*c.height*.7;
-      const z=this.data[y*this.width+x]*this.height*c.height*.24;
-      const rx=px*Math.cos(this.yaw)-py*Math.sin(this.yaw)*.3;
-      const ry=py*Math.cos(this.pitch)-z*Math.sin(-this.pitch+.6);
-      if(x===0)ctx.moveTo(c.width/2+rx,c.height*.57+ry);else ctx.lineTo(c.width/2+rx,c.height*.57+ry);
+      const px=(x/(this.width-1)-.5)*2*aspect*fit,py=(.5-y/(this.heightPixels-1))*2*fit;
+      const z=(this.data[y*this.width+x]-.2)*this.height;
+      const rx=px*Math.cos(this.yaw)+z*Math.sin(this.yaw),rz=-px*Math.sin(this.yaw)+z*Math.cos(this.yaw);
+      const ry=py*Math.cos(this.pitch)-rz*Math.sin(this.pitch),depth=3.65/this.zoom-py*Math.sin(this.pitch)-rz*Math.cos(this.pitch);
+      const xx=c.width/2+rx*1.25*c.height/depth,yy=c.height/2-ry*1.25*c.height/depth;
+      if(x===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);
     }ctx.stroke();}
   }
 }
