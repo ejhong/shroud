@@ -14,14 +14,14 @@ function exampleExposure(){
     const worker=new Worker(new URL('./worker.js',import.meta.url),{type:'module'});
     worker.onmessage=({data})=>{worker.terminate();if(data.error){reject(new Error(data.error));return;}
       resolve({width,height,data:data.result.frames.at(-1),invert:true,name:'Example sunlight exposure · Beauchamp glass painting',
-        note:'A built-in example: Beauchamp’s glass painting after 10 modeled days, with a 3 mm air gap. Run the sunlight lab to replace it with your own latest exposure. The modeled reflectance is inverted here.'});};
+        note:'Beauchamp example: 10 modeled days, 3 mm gap, inverted reflectance. Run the sunlight lab to replace it.'});};
     worker.onerror=()=>{worker.terminate();reject(new Error('Example exposure could not be calculated.'));};
     worker.postMessage({mask:mask.buffer,width,height,settings:DEFAULTS,frames:1});
   })).catch(error=>{examplePromise=null;throw error;});
   return examplePromise;
 }
 refreshSimulationOption();window.addEventListener('storage',refreshSimulationOption);
-const notes={shroud:'An uncalibrated photographic negative supplied with the original Python experiment. Analysis uses a 180-pixel-wide resampling.',enrie:'The Enrie negative reproduction used on the home page, via Wikimedia Commons. This analysis uses the file’s original tones without the home page’s CSS contrast. It is not the input file used by Downing or the 1997 VP-8 demonstration.',archive:'A second supplied archival negative. A fixed crop excludes the mount and handwritten caption; tones are not calibrated.',known:'A schematic face with known geometry. Pixel values are the actual heights used to construct it.',portrait:'The same schematic geometry with side illumination and darker beard reflectance. This is a rendered control, not a photograph of a person.',painted:'The independently constructed brush study from the sunlight lab. It contains no Shroud pixels and has no known underlying face geometry.'};
+const notes={shroud:'Supplied photographic negative; tones are uncalibrated. Resampled to 180 pixels wide.',enrie:'Enrie reproduction via Wikimedia Commons, without the home display’s contrast adjustment. It is not the original reconstruction-study input.',archive:'Supplied archival negative, cropped to remove its mount and caption. Uncalibrated tones.',known:'A schematic face with known geometry. Pixel values are the actual heights used to construct it.',portrait:'The known geometry with side lighting and a darker beard. A synthetic control.',painted:'Independent brush study with no Shroud pixels or known reference geometry.'};
 function settings(){return {smoothing:Number($('smooth').value),inverted:$('invert').checked,stretched:$('stretch').checked,gamma:Number($('gamma').value)};}
 function profile(){
   if(!source||!processed)return;
@@ -37,14 +37,14 @@ function profile(){
     ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.setLineDash(dash);ctx.beginPath();
     for(let x=0;x<values.length;x++){const y=H-15-values[x]*(H-30),xx=24+x/(values.length-1)*(W-29);x?ctx.lineTo(xx,y):ctx.moveTo(xx,y);}ctx.stroke();
   }
-  $('profile-caption').textContent=(vertical?'Column ':'Row ')+(raw.index+1)+' of '+raw.count+'. Read '+(vertical?'forehead → chin':'left → right')+'. Relative height before relief scaling; neither axis is calibrated in millimetres.';
+  $('profile-caption').textContent=(vertical?'Column ':'Row ')+(raw.index+1)+' of '+raw.count+'. Read '+(vertical?'forehead → chin':'left → right')+'. Relative units, before relief scaling.';
 }
 function update(){
   if(!source)return;
   const p=settings(),fields=heightFields(source.data,source.width,source.height,p);baseline=fields.baseline;processed=fields.adjusted;
   for(const [view,data] of [[surface,processed],[baselineSurface,baseline]]){view.height=Number($('height').value);view.mode=Number($('material').value);view.setData(data,source.width,source.height);}profile();
-  $('processing-note').textContent='Both: '+source.width+' × '+source.height+' samples, '+(p.inverted?'inverted':'original')+' polarity, same camera and relief scale. Right only: smoothing '+p.smoothing.toFixed(2)+' px · stretch '+(p.stretched?'on':'off')+' · exponent '+p.gamma.toFixed(2)+'.';
-  $('agreement').textContent=reference?'Agreement with known heights: Pearson r = '+correlation(processed,reference).toFixed(3)+'. This measures relative shape, not a calibrated depth scale.':'Reference geometry: unavailable for this image. No anatomical accuracy score is implied.';
+  $('processing-note').textContent='Both views: '+source.width+' × '+source.height+' samples, '+(p.inverted?'inverted':'original')+' polarity. Right: smoothing '+p.smoothing.toFixed(2)+' px · stretch '+(p.stretched?'on':'off')+' · exponent '+p.gamma.toFixed(2)+'.';
+  $('agreement').textContent=reference?'Agreement with known heights: Pearson r = '+correlation(processed,reference).toFixed(3)+'. Relative shape only.':'No reference geometry; anatomical accuracy cannot be scored.';
   $('depth-status').textContent=source.width+' × '+source.height+' samples';document.body.dataset.ready='true';
 }
 for(const id of ['height','smooth','gamma','invert','stretch','material','slice','slice-axis'])$(id).addEventListener($(id).type==='range'?'input':'change',id==='slice'||id==='slice-axis'?profile:update);

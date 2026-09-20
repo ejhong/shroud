@@ -21,7 +21,7 @@ function showPaintingSelection(kind,label){
   if(label){const option=new Option(label,kind);option.disabled=true;option.dataset.local='true';select.add(option);}
   select.value=kind;$('painting-reference').hidden=kind!=='beauchamp';
 }
-function markCustom(){sourceKind='custom';showPaintingSelection(sourceKind,'Custom painting · local');$('share').disabled=true;$('painting-note').textContent='Your edited painting. It is kept locally and included in downloaded experiment data.';}
+function markCustom(){sourceKind='custom';showPaintingSelection(sourceKind,'Custom painting · local');$('share').disabled=true;$('painting-note').textContent='Your local painting, included in experiment downloads.';}
 function stop(){playing=false;cancelAnimationFrame(animation);$('play').textContent='↻ Play exposure';}
 
 function drawProgress() {
@@ -72,20 +72,20 @@ async function choosePainting(kind) {
       // proxy, not a measurement of the original paint's spectral transmission.
       const image=await beauchampPainting();next=image.data;nextW=image.width;nextH=image.height;
       name='Beauchamp original glass painting · photographic mask';
-      note='David Beauchamp’s original painting, shown on Shadow Shroud. A face-only crop becomes the mask; brightness above the dark background approximates paint coverage. Width: 300 mm, assumed.';
+      note='Beauchamp’s photographed painting, cropped to the face. Brightness approximates paint opacity. Assumed width: 300 mm.';
     }else if(kind==='shroud') {
       const image=await loadField('assets/images/face-negative.jpg',144);next=normalize(image.data);nextW=image.width;nextH=image.height;
-      name='Shroud-derived face mask';note='Derived from the supplied negative. Its highlights become paint. This is a reconstruction exercise with the target built into the input.';
+      name='Shroud-derived face mask';note='Derived from the supplied negative: highlights become paint. The target already supplies the face.';
     }else if(kind==='full') {
       const image=await loadField('assets/images/shroud-full.jpg',96);next=normalize(Float32Array.from(image.data,v=>1-v));nextW=image.width;nextH=image.height;nextMM=1100;
-      name='Full-cloth photograph-derived mask';note='Derived from the full positive photograph, including burns and repairs. Width is assumed to be 1.1 m; height follows the photograph’s aspect ratio. A reconstruction exercise.';
+      name='Full-cloth photograph-derived mask';note='Target-derived mask, including burns and repairs. Assumed width: 1.1 m; proportions follow the photograph.';
     }else if(kind==='bars') {
       next=new Float32Array(nextW*nextH);for(let y=0;y<nextH;y++)for(let x=0;x<nextW;x++){
         const circle=Math.hypot(x-nextW/2,y-nextH*.68)<nextW*.20;
         next[y*nextW+x]=(y<nextH*.4&&y>nextH*.15&&x>20&&x<nextW-20&&(Math.floor(x/8)%2===0))||circle?1:0;
       }name='Line and circle control';note='An independent geometric pattern. Watch how moving shadows change edge sharpness and fine lines.';
     }else if(kind==='blank'){next=new Float32Array(nextW*nextH);name='Custom blank-glass drawing';note='The glass is clear. Draw light paint on the dark pane to shelter the linen below.';}
-    else {next=paintedFace();name='Independent brush study';note='A constructed face with brush-like variation. No Shroud pixels enter this painting. Draw directly on the glass below.';}
+    else {next=paintedFace();name='Independent brush study';note='An independent brush study with no Shroud pixels. Draw on the glass to edit it.';}
     if(id!==loadRevision)return;
     mask=next;w=nextW;h=nextH;widthMM=nextMM;sourceName=name;sourceKind=kind;targetInput=kind==='shroud'||kind==='full'?next.slice():null;history=[];$('undo').disabled=true;
     showPaintingSelection(kind);$('painting-note').textContent=note;$('share').disabled=false;updatePaint();compute();
@@ -114,7 +114,7 @@ $('erase').addEventListener('click',()=>{erasing=!erasing;$('erase').setAttribut
 $('undo').addEventListener('click',()=>{if(!history.length)return;mask=history.pop();$('undo').disabled=!history.length;markCustom();updatePaint();compute();});
 $('clear').addEventListener('click',()=>{snapshot();mask.fill(0);markCustom();updatePaint();compute();});
 
-document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{view=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('output-note').textContent=view==='linen'?'Illustrative linen colors. The weave is a display texture and does not enter the optical calculation.':'Photographic negative with its tonal range stretched for viewing. This display adjustment is not used in the physics.';drawProgress();}));
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{view=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('output-note').textContent=view==='linen'?'Illustrative colors and weave; texture does not affect exposure.':'Negative, with tones stretched for display only.';drawProgress();}));
 $('time').addEventListener('input',()=>{stop();drawProgress();});
 $('play').addEventListener('click',()=>{
   if(!result)return;if(playing){stop();return;}playing=true;$('play').textContent='Ⅱ Pause exposure';const start=performance.now();
@@ -157,7 +157,7 @@ $('fit-mask').addEventListener('click',()=>{
     if(rev!==revision)return;fitWorker.terminate();fitWorker=null;$('fit-mask').disabled=false;
     if(data.error){$('fit-status').textContent=data.error;return;}
     snapshot();fitReport=data.result;mask=fitReport.mask;sourceKind='fitted-'+(w===96?'full':'shroud');sourceName='Target-fitted Shroud '+(w===96?'full-cloth':'face')+' mask';
-    showPaintingSelection(sourceKind,'Fitted Shroud mask · local');$('share').disabled=true;$('painting-note').textContent='Paint mask fitted to target photographic tones, with opacity constrained to 0–1. This is a modern inverse-design demonstration.';
+    showPaintingSelection(sourceKind,'Fitted Shroud mask · local');$('share').disabled=true;$('painting-note').textContent='Target-fitted mask with opacity constrained to 0–1. A modern reconstruction exercise.';
     drawField($('fit-target'),fitReport.target,w,h,{mode:'linen'});drawField($('fit-result'),fitReport.predicted,w,h,{mode:'linen'});
     const difference=Float32Array.from(fitReport.predicted,(v,i)=>clamp(Math.abs(v-fitReport.target[i])/.2));drawField($('fit-residual'),difference,w,h,{mode:'heat'});
     $('fit-plates').hidden=false;$('fit-explanation').hidden=false;

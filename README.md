@@ -21,10 +21,10 @@ The browser check uses installed Google Chrome on macOS, with a temporary profil
 
 ## Pages
 
-- `index.html`: illustrated inquiry, an identifiable archival face, the original Shadow Shroud physical-result photographs, evidence overview, and saved model outputs.
+- `index.html`: an archival face, direct entrances to both labs, the cloth, physical Shadow Shroud trials, an evidence overview, and clearly labeled model outputs.
 - `shadow.html`: start with Beauchamp’s original glass painting, paint/upload an opacity mask, adjust physical settings, animate integrated exposure, compare six matched-dose conditions, fit a target-informed mask, save/load experiments, and send an image into the depth lab.
-- `depth.html`: published reconstruction references, synchronized unfiltered/adjusted height fields, horizontal and vertical profiles, known-geometry controls, and image/data exports.
-- `methods.html`: sources, equations, assumptions, reproduction instructions, and image credits.
+- `depth.html`: synchronized unfiltered/adjusted height fields first, with profiles, known-geometry controls, and exports; the documentary and reconstruction references follow the experiment.
+- `methods.html`: grouped navigation through evidence, model equations, reproduction instructions, and image credits.
 - `research.html`: one ranked agenda of ten distinct studies, access requirements, a detailed Shadow Shroud protocol, decision criteria, and primary references.
 
 ## Implementation

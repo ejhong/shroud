@@ -15,7 +15,7 @@ revealLinkedStudy();
 let printState=null;
 window.addEventListener('beforeprint',()=>{
   if(printState)return;
-  printState=new Map([...document.querySelectorAll('.research-project')].map(study=>[study,study.open]));
+  printState=new Map([...document.querySelectorAll('.research-project, .editorial-note')].map(study=>[study,study.open]));
   for(const study of printState.keys())study.open=true;
 });
 window.addEventListener('afterprint',()=>{
