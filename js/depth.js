@@ -2,7 +2,7 @@ import {knownFace,litPortrait,paintedFace,correlation,MODEL_VERSION,DEFAULTS} fr
 import {loadField,drawField,Surface,bindRanges,download,downloadCanvas} from './visuals.js';
 import {loadExposure} from './experiments.js';
 import {beauchampPainting} from './paintings.js';
-import {heightFields,crossSection,reconstruct,distanceControl,geometryError,metricDisplay,RECONSTRUCTION_DEFAULTS,RECONSTRUCTION_PROCESSING,RECONSTRUCTION_VERSION,CLOTH_DATUM} from './depth-model.js';
+import {heightFields,crossSection,reconstruct,distanceControl,geometryError,metricDisplay,RECONSTRUCTION_DEFAULTS,RECONSTRUCTION_PROCESSING,RECONSTRUCTION_VERSION,CLOTH_DATUM} from './depth-model.js?v=distance-2';
 const $=id=>document.getElementById(id);bindRanges();$('depth-controls').addEventListener('submit',e=>e.preventDefault());
 const surface=new Surface($('surface')),baselineSurface=new Surface($('baseline-surface'));
 for(const [a,b] of [[surface,baselineSurface],[baselineSurface,surface]])a.onViewChange=view=>{Object.assign(b,view);b.draw();};

@@ -38,11 +38,31 @@ try{
   assert.equal(await client.evaluate(`document.body.dataset.depthMode`),'reconstruction');
   assert.ok(await client.evaluate(`document.getElementById('surface-label').textContent.includes('EXAMPLE SUNLIGHT')`));
   assert.ok(await client.evaluate(`document.getElementById('source-note').textContent.includes('Beauchamp')`));
-  await navigate('index.html');await until(`document.querySelector('#home-depth').dataset.ready==='true'`);await screenshot('home-desktop.png');await screenshot('home-full.png',true);
+  await navigate('index.html');await client.evaluate(`document.getElementById('home-depth').loading='eager';document.getElementById('home-depth').decode()`);await screenshot('home-desktop.png');await screenshot('home-full.png',true);
   assert.ok(await client.evaluate(`document.querySelector('#hero-image img').src.endsWith('shroud-face-enrie.jpg')`));
   await client.evaluate(`document.getElementById('physical-experiment').scrollIntoView()`);await screenshot('physical-experiment.png');
   await click('[data-photo="inverse"]');assert.equal(await client.evaluate(`document.querySelector('#hero-image').classList.contains('inverted')`),true);
   await client.evaluate(`document.querySelector('#experiments').scrollIntoView()`);await screenshot('experiments-desktop.png');
+  // Navigation previews must remain visible even when all page scripts fail.
+  async function assertHomePreviews(){
+    const images=await client.evaluate(`Promise.all(['home-apparatus','home-depth','story-apparatus'].map(async id=>{
+      const image=document.getElementById(id);image.loading='eager';await image.decode();
+      const canvas=document.createElement('canvas');canvas.width=120;canvas.height=65;
+      const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0,120,65);
+      const pixels=ctx.getImageData(0,0,120,65).data;let visible=0;
+      for(let i=0;i<pixels.length;i+=4)if(pixels[i]+pixels[i+1]+pixels[i+2]>150)visible++;
+      return {id,tag:image.tagName,width:image.naturalWidth,visible};
+    }))`);
+    for(const image of images){assert.equal(image.tag,'IMG');assert.ok(image.width>=1200);assert.ok(image.visible>200,`Black preview: ${image.id}`);}
+  }
+  await assertHomePreviews();
+  await client.send('Emulation.setScriptExecutionDisabled',{value:true});
+  await navigate('index.html');await assertHomePreviews();
+  await client.evaluate(`document.getElementById('experiments').scrollIntoView()`);await screenshot('home-previews-no-js-desktop.png');
+  await navigate('index.html',390,844);await assertHomePreviews();
+  await client.evaluate(`document.getElementById('home-depth').scrollIntoView({block:'center'})`);await screenshot('home-previews-no-js-mobile.png');
+  await client.send('Emulation.setScriptExecutionDisabled',{value:false});
+
   await navigate('shadow.html');await until(ready);await screenshot('sunlight-desktop.png');await screenshot('sunlight-full.png',true);
   assert.equal(await client.evaluate(`document.getElementById('painting').value`),'beauchamp');
   assert.equal(await client.evaluate(`document.getElementById('painting-reference').hidden`),false);
@@ -215,5 +235,5 @@ try{
   await navigate('depth.html',390,844);await until(ready);assert.equal(await client.evaluate(`document.getElementById('surface').dataset.fallback`),'true');await screenshot('cloth-reconstruction-fallback.png');await click('[data-depth-mode="brightness"]');await screenshot('depth-fallback.png');await click('[data-depth-mode="reconstruction"]');assert.ok(await client.evaluate(`document.getElementById('processing-note').textContent.includes('physical scale')`));await client.send('Page.removeScriptToEvaluateOnNewDocument',{identifier});
   const exceptions=client.events.filter(e=>e.method==='Runtime.exceptionThrown');assert.deepEqual(exceptions,[],'Uncaught JavaScript exceptions');
   const bad=client.events.filter(e=>e.method==='Network.responseReceived'&&e.params.response.url.startsWith(base.origin)&&e.params.response.status>=400).map(e=>e.params.response.url);assert.deepEqual(bad,[],'Failed local requests');
-  console.log(`Browser checks passed: desktop/mobile layouts, original painting and physical-result assets, photo inversion, physical controls, playback, painting/undo, six comparisons, target fitting, JSON export/import, image upload, automatic cross-page persistence, first-visit example, WebGL and its fallback, linked height comparisons, vertical sections, unified research agenda, deep links, print restoration, synthetic controls, cloth inversion, explicit shape priors, fixed known-distance recovery, physical scale, reconstruction exports, 320px layouts, the default cloth reconstruction, and direct-relief links.\nScreenshots: ${screenshots}\nDownloads: ${downloads}`);
+  console.log(`Browser checks passed: desktop/mobile layouts, original painting and physical-result assets, photo inversion, physical controls, playback, painting/undo, six comparisons, target fitting, JSON export/import, image upload, automatic cross-page persistence, first-visit example, WebGL and its fallback, linked height comparisons, vertical sections, unified research agenda, deep links, print restoration, synthetic controls, cloth inversion, explicit shape priors, fixed known-distance recovery, physical scale, reconstruction exports, 320px layouts, the default cloth reconstruction, direct-relief links, and nonblank homepage previews with JavaScript disabled.\nScreenshots: ${screenshots}\nDownloads: ${downloads}`);
 }finally{client?.close();browserClient?.close();browser.kill('SIGTERM');}

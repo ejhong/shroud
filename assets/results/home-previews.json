@@ -1,0 +1,33 @@
+{
+  "model": "cloth-distance-1",
+  "source": "assets/images/face-negative.jpg",
+  "width": 180,
+  "height": 244,
+  "processing": {
+    "smoothing": 2.25,
+    "inverted": false,
+    "stretched": true,
+    "gamma": 1
+  },
+  "reconstruction": {
+    "cloth": "arched",
+    "range": 37,
+    "law": "linear",
+    "sideDrop": 30,
+    "lengthDrop": 10,
+    "headDepth": 45,
+    "broadScale": 15,
+    "imageWidth": 160
+  },
+  "camera": {
+    "yaw": -0.34,
+    "pitch": -0.45,
+    "zoom": 1
+  },
+  "sun": {
+    "east": 0.4,
+    "north": -0.3,
+    "up": 0.866
+  },
+  "method": "Unedited canvas renders from the same modules used by the labs."
+}
